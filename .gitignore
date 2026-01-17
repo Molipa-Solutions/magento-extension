@@ -1,0 +1,29 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Composer / Vendor (NO versionar)
+vendor/
+composer.lock
+
+# Magento generated / cache (por si alguien prueba el módulo dentro de un proyecto)
+var/
+generated/
+pub/static/
+pub/media/
+app/etc/env.php
+
+# Logs
+*.log
+
+# PHPUnit
+.phpunit.result.cache
+
+# Node / Frontend tooling (si en el futuro agregás)
+node_modules/
+
+# Mac / Linux temp
+*.tmp
