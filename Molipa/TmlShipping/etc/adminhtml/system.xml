@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="tmlshipping" translate="label" sortOrder="900"
+                 showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>TML Shipping</label>
+            <tab>sales</tab>
+            <resource>Molipa_TmlShipping::config</resource>
+
+            <group id="general" translate="label" sortOrder="10"
+                   showInDefault="0" showInWebsite="1" showInStore="0">
+                <label>General</label>
+
+                <field id="enabled" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable TML Shipping</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+            </group>
+
+            <group id="credentials" translate="label" type="text" sortOrder="20" showInDefault="0" showInWebsite="1" showInStore="0">
+                <label>Credentials</label>
+
+                <field id="client_id" translate="label" type="text" sortOrder="10" showInDefault="0" showInWebsite="1" showInStore="0">
+                    <label>Client ID</label>
+                </field>
+
+                <field id="client_secret" translate="label" type="obscure" sortOrder="20" showInDefault="0" showInWebsite="1" showInStore="0">
+                    <label>Client Secret</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+
+            </group>
+
+        </section>
+    </system>
+</config>
