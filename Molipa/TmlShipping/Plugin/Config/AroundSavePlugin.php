@@ -21,6 +21,11 @@ class AroundSavePlugin
 {
     private const PATH_ENABLED = 'tmlshipping/general/enabled';
 
+    private const SENSITIVE_KEYS = [
+        'clientId',
+        'clientSecret'
+    ];
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly StoreManagerInterface $storeManager,
@@ -130,7 +135,7 @@ class AroundSavePlugin
                 $websiteId,
                 $status,
                 $body,
-                $this->encodeJson($payload)
+                $this->encodeJson($this->redactArrayRecursive($payload))
             ));
 
             if (!$this->is2xx($status)) {
@@ -171,7 +176,7 @@ class AroundSavePlugin
     {
         $this->curl->setTimeout(8);
         $this->curl->addHeader('Content-Type', 'application/json');
-        $this->curl->addHeader('X-Provider', 'magento');
+        $this->curl->addHeader('X-Provider', 'MAGENTO');
     }
 
     private function is2xx(int $status): bool
@@ -228,7 +233,7 @@ class AroundSavePlugin
     private function buildCreateStorePayload(string $websiteCode, int $websiteId): array
     {
         return [
-            'providerWebsiteId'   => $websiteId,
+            'providerStoreId'   => $websiteId,
             'providerStoreName'   => $this->resolveStoreName($websiteCode),
             'providerStoreEmail'  => $this->resolveStoreEmail($websiteCode),
             'providerStoreDomain' => $this->resolveBaseDomain($websiteCode),
@@ -353,5 +358,30 @@ class AroundSavePlugin
             ));
             return null;
         }
+    }
+
+    private function redactArrayRecursive(array $data): array
+    {
+        foreach ($data as $k => $v) {
+            if (is_string($k) && $this->isSensitiveKey($k)) {
+                $data[$k] = '***REDACTED***';
+                continue;
+            }
+            if (is_array($v)) {
+                $data[$k] = $this->redactArrayRecursive($v);
+            }
+        }
+        return $data;
+    }
+
+    private function isSensitiveKey(string $key): bool
+    {
+        $keyLower = strtolower($key);
+        foreach (self::SENSITIVE_KEYS as $s) {
+            if ($keyLower === strtolower($s)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

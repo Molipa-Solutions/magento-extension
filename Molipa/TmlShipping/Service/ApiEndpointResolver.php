@@ -19,6 +19,11 @@ final class ApiEndpointResolver
         return $this->resolveBaseUrl() . '/stores';
     }
 
+    public function resolveWebhookUrl(): string
+    {
+        return $this->resolveBaseUrl() . '/webhooks';
+    }
+
     public function resolveBaseUrl(): string
     {
         $mode = $this->appState->getMode();

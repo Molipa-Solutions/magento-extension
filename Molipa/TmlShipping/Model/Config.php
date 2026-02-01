@@ -4,9 +4,11 @@ namespace Molipa\TmlShipping\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
+use Molipa\TmlShipping\Config\ConfigPaths;
 
 class Config
 {
+
     public function __construct(
         private ScopeConfigInterface $scopeConfig
     ) {}
@@ -14,7 +16,25 @@ class Config
     public function isEnabledForWebsite(int $websiteId): bool
     {
         return $this->scopeConfig->isSetFlag(
-            'tmlshipping/general/enabled',
+            ConfigPaths::XML_ENABLED,
+            ScopeInterface::SCOPE_WEBSITE,
+            $websiteId
+        );
+    }
+
+    public function getClientIdForWebsite(int $websiteId): string
+    {
+        return (string)$this->scopeConfig->getValue(
+            ConfigPaths::CLIENT_ID,
+            ScopeInterface::SCOPE_WEBSITE,
+            $websiteId
+        );
+    }
+
+    public function getClientSecretForWebsite(int $websiteId): string
+    {
+        return (string)$this->scopeConfig->getValue(
+            ConfigPaths::CLIENT_SECRET,
             ScopeInterface::SCOPE_WEBSITE,
             $websiteId
         );
