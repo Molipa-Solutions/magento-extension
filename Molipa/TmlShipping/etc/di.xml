@@ -6,4 +6,12 @@
                 type="Molipa\TmlShipping\Plugin\Config\AroundSavePlugin"
                 sortOrder="10"/>
     </type>
+
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="tmlshipping_retry_outbox" xsi:type="object">Molipa\TmlShipping\Console\Command\RetryOutboxCommand</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

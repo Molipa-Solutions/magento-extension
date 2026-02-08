@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="sales_order_invoice_pay">
-        <observer name="molipa_tmlshipping_invoice_paid"
-                  instance="Molipa\TmlShipping\Observer\InvoicePaidObserver"/>
+    <event name="sales_order_shipment_save_after">
+        <observer name="molipa_tmlshipping_shipment_created"
+                  instance="Molipa\TmlShipping\Observer\ShipmentCreatedObserver"/>
     </event>
 </config>

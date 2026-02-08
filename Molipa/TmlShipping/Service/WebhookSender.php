@@ -16,7 +16,7 @@ class WebhookSender
         private readonly ApiEndpointResolver $apiEndpointResolver
     ) {}
 
-    public function sendOrdersPaid(array $payload, string $eventId, int $websiteId): void
+    public function sendOrders(array $payload, string $eventId, int $websiteId): void
     {
         $url = $this->apiEndpointResolver->resolveWebhookUrl();
         if (!$url) {
@@ -26,7 +26,7 @@ class WebhookSender
         $provider = 'MAGENTO';
         $clientId = $this->config->getClientIdForWebsite($websiteId);
         $secret = $this->config->getClientSecretForWebsite($websiteId);
-        $eventType = 'orders/paid';
+        $eventType = 'orders/fulfilled';
 
         $body = json_encode($payload, JSON_UNESCAPED_UNICODE);
         if ($body === false) {
@@ -56,7 +56,7 @@ class WebhookSender
             'X-Provider' => $provider,
             'X-ClientId' => $clientId,
             'X-EventType' => $eventType,
-            'X-Nonce' => $eventId,
+            'X-EventId' => $eventId,
             'X-Hmac-Sha256' => $signatureBase64,
         ];
 
