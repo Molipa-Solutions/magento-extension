@@ -24,6 +24,11 @@ final class ApiEndpointResolver
         return $this->resolveBaseUrl() . '/webhooks';
     }
 
+    public function resolveRatesUrl(): string
+    {
+        return $this->resolveBaseUrl() . '/carrier/rates';
+    }
+
     public function resolveBaseUrl(): string
     {
         $mode = $this->appState->getMode();

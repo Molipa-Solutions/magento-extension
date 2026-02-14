@@ -13,7 +13,8 @@ class WebhookSender
         private readonly Curl $curl,
         private readonly Config $config,
         private readonly LoggerInterface $logger,
-        private readonly ApiEndpointResolver $apiEndpointResolver
+        private readonly ApiEndpointResolver $apiEndpointResolver,
+        private readonly HmacSigner $hmacSigner,
     ) {}
 
     public function sendOrders(array $payload, string $eventId, int $websiteId): void
@@ -38,18 +39,11 @@ class WebhookSender
             $eventId = bin2hex(random_bytes(16));
         }
 
-        // === HMAC (igual que tu backend) ===
-        $bodySha256Hex = hash('sha256', $body);
-        $canonical = implode("\n", [
-            $provider,
-            $clientId,
-            $eventType,
-            $eventId,
-            $bodySha256Hex
-        ]);
-
-        $sigRaw = hash_hmac('sha256', $canonical, $secret, true);
-        $signatureBase64 = base64_encode($sigRaw);
+        $signatureBase64 = $this->hmacSigner->signCanonicalWithBodyHashBase64(
+            [$provider, $clientId, $eventType, $eventId],
+            $body,
+            $secret
+        );
 
         $headers = [
             'Content-Type' => 'application/json',

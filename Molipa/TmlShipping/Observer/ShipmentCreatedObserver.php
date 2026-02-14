@@ -8,6 +8,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Address;
 use Magento\Sales\Model\Order\Shipment;
+use Molipa\TmlShipping\Service\WeightInGramsCalculator;
 use Psr\Log\LoggerInterface;
 use Molipa\TmlShipping\Service\WebhookSender;
 use Molipa\TmlShipping\Model\Config;
@@ -21,7 +22,6 @@ use Molipa\TmlShipping\Service\OutboxStatus;
 
 class ShipmentCreatedObserver implements ObserverInterface
 {
-    private const XML_PATH_WEIGHT_UNIT = 'general/locale/weight_unit';
     private const EVENT_TYPE = 'shipment_created';
 
     public function __construct(
@@ -32,6 +32,7 @@ class ShipmentCreatedObserver implements ObserverInterface
         private readonly CountryFactory $countryFactory,
         private readonly RegionFactory $regionFactory,
         private readonly OutboxEnqueuer $outboxEnqueuer,
+        private readonly WeightInGramsCalculator $weightCalc,
         private readonly OutboxStatus $outboxStatus,
     ) {}
 
@@ -62,6 +63,16 @@ class ShipmentCreatedObserver implements ObserverInterface
             return;
         }
 
+        $shippingMethod = (string)($order->getShippingMethod() ?? '');
+        if ($shippingMethod !== 'tml_tml') {
+            $this->logger->info('[TmlShipping] Skipping shipment webhook - not TML shipping method', [
+                'shippingMethod' => $shippingMethod,
+                'orderId' => $order->getIncrementId()
+            ]);
+            return;
+        }
+
+
         $eventId = 'shipment:' . $shipment->getEntityId();
 
         $orderDate = null;
@@ -91,7 +102,7 @@ class ShipmentCreatedObserver implements ObserverInterface
 
             'shippingAddress' => $this->mapShippingAddress($order),
 
-            'products' => $this->mapItems($order),
+            'products' => $this->mapItems($shipment),
         ];
 
         $payloadJson = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -181,54 +192,34 @@ class ShipmentCreatedObserver implements ObserverInterface
 
 
 
-    private function mapItems(Order $order): array
+    private function mapItems(Shipment $shipment): array
     {
         $products = [];
+        $order = $shipment->getOrder();
         $storeId = (int)$order->getStoreId();
-        $unit = $this->getWeightUnit($storeId);
 
-        foreach ($order->getAllVisibleItems() as $item) {
-            $weightPerUnit = (float)($item->getWeight() ?? 0);
-            $qty = (int)$item->getQtyOrdered();
+        foreach ($shipment->getAllItems() as $sItem) {
+            $orderItem = $sItem->getOrderItem();
+            if (!$orderItem) continue;
 
-            $safeQty = max($qty, 1);
-            $grams = $this->toGrams($weightPerUnit, $unit) * $safeQty;
+            $weightPerUnit = (float)($orderItem->getWeight() ?? 0);
+            $qty = (float)($sItem->getQty() ?? 0);
+
+            if ($qty <= 0) continue;
+
+            $gramsPerUnit = $this->weightCalc->fromPackageWeight($weightPerUnit, $storeId);
+            $grams = $gramsPerUnit * $qty;
 
             $products[] = [
-                'sku' => (string)$item->getSku(),
-                'name' => (string)$item->getName(),
+                'sku' => (string)$orderItem->getSku(),
+                'name' => (string)$orderItem->getName(),
                 'grams' => $grams,
-                'quantity' => $safeQty,
-                'price' => (float)$item->getPrice(),
+                'quantity' => $qty,
+                'price' => (float)$orderItem->getPrice(),
             ];
         }
 
         return $products;
-    }
-
-    private function getWeightUnit(int $storeId): string
-    {
-        $unit = (string)$this->scopeConfig->getValue(
-            self::XML_PATH_WEIGHT_UNIT,
-            ScopeInterface::SCOPE_STORE,
-            $storeId
-        );
-
-        $unit = strtolower(trim($unit));
-        return $unit !== '' ? $unit : 'kgs';
-    }
-
-    private function toGrams(float $weight, string $unit): int
-    {
-        if ($weight <= 0) {
-            return 0;
-        }
-
-        return match ($unit) {
-            'kgs', 'kg' => (int)round($weight * 1000),
-            'lbs', 'lb' => (int)round($weight * 453.59237),
-            default => (int)round($weight * 1000),
-        };
     }
 
 }

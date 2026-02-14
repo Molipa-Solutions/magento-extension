@@ -7,5 +7,15 @@
                 <enabled>0</enabled>
             </general>
         </tmlshipping>
+        <carriers>
+            <tml>
+                <active>1</active>
+                <title>TML</title>
+                <name>TML</name>
+                <sort_order>15</sort_order>
+
+                <model>Molipa\TmlShipping\Model\Carrier\Tml</model>
+            </tml>
+        </carriers>
     </default>
 </config>
