@@ -10,11 +10,24 @@ use Molipa\TmlShipping\Model\ResourceModel\Outbox\CollectionFactory as OutboxCol
 
 class OutboxEnqueuer
 {
+    /** @var OutboxFactory */
+    private $outboxFactory;
+
+    /** @var OutboxResource */
+    private $outboxResource;
+
+    /** @var OutboxCollectionFactory */
+    private $collectionFactory;
+
     public function __construct(
-        private readonly OutboxFactory $outboxFactory,
-        private readonly OutboxResource $outboxResource,
-        private readonly OutboxCollectionFactory $collectionFactory,
-    ) {}
+        OutboxFactory $outboxFactory,
+        OutboxResource $outboxResource,
+        OutboxCollectionFactory $collectionFactory
+    ) {
+        $this->outboxFactory = $outboxFactory;
+        $this->outboxResource = $outboxResource;
+        $this->collectionFactory = $collectionFactory;
+    }
 
     public function getOrCreate(
         string $eventType,

@@ -24,17 +24,46 @@ class ShipmentCreatedObserver implements ObserverInterface
 {
     private const EVENT_TYPE = 'shipment_created';
 
+    /** @var WebhookSender */
+    private $webhookSender;
+    /** @var Config */
+    private $config;
+    /** @var LoggerInterface */
+    private $logger;
+    /** @var ScopeConfigInterface */
+    private $scopeConfig;
+    /** @var CountryFactory */
+    private $countryFactory;
+    /** @var RegionFactory */
+    private $regionFactory;
+    /** @var OutboxEnqueuer */
+    private $outboxEnqueuer;
+    /** @var WeightInGramsCalculator */
+    private $weightCalc;
+    /** @var OutboxStatus */
+    private $outboxStatus;
+
     public function __construct(
-        private readonly WebhookSender $webhookSender,
-        private readonly Config $config,
-        private readonly LoggerInterface $logger,
-        private readonly ScopeConfigInterface $scopeConfig,
-        private readonly CountryFactory $countryFactory,
-        private readonly RegionFactory $regionFactory,
-        private readonly OutboxEnqueuer $outboxEnqueuer,
-        private readonly WeightInGramsCalculator $weightCalc,
-        private readonly OutboxStatus $outboxStatus,
-    ) {}
+        WebhookSender $webhookSender,
+        Config $config,
+        LoggerInterface $logger,
+        ScopeConfigInterface $scopeConfig,
+        CountryFactory $countryFactory,
+        RegionFactory $regionFactory,
+        OutboxEnqueuer $outboxEnqueuer,
+        WeightInGramsCalculator $weightCalc,
+        OutboxStatus $outboxStatus
+    ) {
+        $this->webhookSender = $webhookSender;
+        $this->config = $config;
+        $this->logger = $logger;
+        $this->scopeConfig = $scopeConfig;
+        $this->countryFactory = $countryFactory;
+        $this->regionFactory = $regionFactory;
+        $this->outboxEnqueuer = $outboxEnqueuer;
+        $this->weightCalc = $weightCalc;
+        $this->outboxStatus = $outboxStatus;
+    }
 
     public function execute(Observer $observer): void
     {

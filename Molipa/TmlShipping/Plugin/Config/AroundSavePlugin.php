@@ -26,17 +26,46 @@ class AroundSavePlugin
         'clientSecret'
     ];
 
+    /** @var ScopeConfigInterface */
+    private $scopeConfig;
+    /** @var StoreManagerInterface */
+    private $storeManager;
+    /** @var Curl */
+    private $curl;
+    /** @var LoggerInterface */
+    private $logger;
+    /** @var ApiEndpointResolver */
+    private $apiEndpointResolver;
+    /** @var ProductMetadataInterface */
+    private $productMetadata;
+    /** @var CountryFactory */
+    private $countryFactory;
+    /** @var RegionFactory */
+    private $regionFactory;
+    /** @var WriterInterface */
+    private $configWriter;
+
     public function __construct(
-        private readonly ScopeConfigInterface $scopeConfig,
-        private readonly StoreManagerInterface $storeManager,
-        private readonly Curl $curl,
-        private readonly LoggerInterface $logger,
-        private readonly ApiEndpointResolver $apiEndpointResolver,
-        private readonly ProductMetadataInterface $productMetadata,
-        private readonly CountryFactory $countryFactory,
-        private readonly RegionFactory $regionFactory,
-        private readonly WriterInterface $configWriter
-    ) {}
+        ScopeConfigInterface $scopeConfig,
+        StoreManagerInterface $storeManager,
+        Curl $curl,
+        LoggerInterface $logger,
+        ApiEndpointResolver $apiEndpointResolver,
+        ProductMetadataInterface $productMetadata,
+        CountryFactory $countryFactory,
+        RegionFactory $regionFactory,
+        WriterInterface $configWriter
+    ) {
+        $this->scopeConfig = $scopeConfig;
+        $this->storeManager = $storeManager;
+        $this->curl = $curl;
+        $this->logger = $logger;
+        $this->apiEndpointResolver = $apiEndpointResolver;
+        $this->productMetadata = $productMetadata;
+        $this->countryFactory = $countryFactory;
+        $this->regionFactory = $regionFactory;
+        $this->configWriter = $configWriter;
+    }
 
     public function aroundSave(Config $subject, callable $proceed): Config
     {
@@ -264,7 +293,7 @@ class AroundSavePlugin
             $fallback = (string)$this->storeManager->getWebsite($websiteCode)->getName();
             $fallback = trim($fallback);
             return $fallback === '' ? null : $fallback;
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             return null;
         }
     }
@@ -311,7 +340,7 @@ class AroundSavePlugin
             $edition = (string)$this->productMetadata->getEdition();
             $edition = trim($edition);
             return $edition === '' ? null : $edition;
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             return null;
         }
     }

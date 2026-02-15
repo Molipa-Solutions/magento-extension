@@ -9,9 +9,14 @@ use Molipa\TmlShipping\Config\ConfigPaths;
 class Config
 {
 
+    /** @var ScopeConfigInterface */
+    private $scopeConfig;
+
     public function __construct(
-        private ScopeConfigInterface $scopeConfig
-    ) {}
+        ScopeConfigInterface $scopeConfig
+    ) {
+        $this->scopeConfig = $scopeConfig;
+    }
 
     public function isEnabledForWebsite(int $websiteId): bool
     {

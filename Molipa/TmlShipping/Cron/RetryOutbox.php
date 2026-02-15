@@ -13,12 +13,26 @@ class RetryOutbox
     private const MAX_ATTEMPTS = 10;
     private const EVENT_TYPE = 'shipment_created';
 
+    /** @var OutboxCollectionFactory */
+    private $collectionFactory;
+    /** @var WebhookSender */
+    private $webhookSender;
+    /** @var OutboxStatus */
+    private $status;
+    /** @var LoggerInterface */
+    private $logger;
+
     public function __construct(
-        private readonly OutboxCollectionFactory $collectionFactory,
-        private readonly WebhookSender $webhookSender,
-        private readonly OutboxStatus $status,
-        private readonly LoggerInterface $logger,
-    ) {}
+        OutboxCollectionFactory $collectionFactory,
+        WebhookSender $webhookSender,
+        OutboxStatus $status,
+        LoggerInterface $logger
+    ) {
+        $this->collectionFactory = $collectionFactory;
+        $this->webhookSender = $webhookSender;
+        $this->status = $status;
+        $this->logger = $logger;
+    }
 
     public function run(int $limit = 50, ?array &$report = null): int
     {

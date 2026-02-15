@@ -16,25 +16,46 @@ use Molipa\TmlShipping\Model\Config;
 use Molipa\TmlShipping\Service\TmlRatesClient;
 use Molipa\TmlShipping\Service\WeightInGramsCalculator;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Model\ScopeInterface;
 
 
 final class Tml extends AbstractCarrier implements CarrierInterface
 {
     protected $_code = 'tml';
 
+    /** @var StoreManagerInterface */
+    private $storeManager;
+    /** @var ResultFactory */
+    private $rateResultFactory;
+    /** @var MethodFactory */
+    private $rateMethodFactory;
+    /** @var Config */
+    private $config;
+    /** @var TmlRatesClient */
+    private $ratesClient;
+    /** @var WeightInGramsCalculator */
+    private $weightCalc;
+
     public function __construct(
-        ScopeConfigInterface                     $scopeConfig,
-        ErrorFactory                             $rateErrorFactory,
-        LoggerInterface                          $logger,
-        private readonly StoreManagerInterface   $storeManager,
-        private readonly ResultFactory           $rateResultFactory,
-        private readonly MethodFactory           $rateMethodFactory,
-        private readonly Config                  $config,
-        private readonly TmlRatesClient          $ratesClient,
-        private readonly WeightInGramsCalculator $weightCalc,
-        array                                    $data = []
+        ScopeConfigInterface $scopeConfig,
+        ErrorFactory $rateErrorFactory,
+        LoggerInterface $logger,
+        StoreManagerInterface $storeManager,
+        ResultFactory $rateResultFactory,
+        MethodFactory $rateMethodFactory,
+        Config $config,
+        TmlRatesClient $ratesClient,
+        WeightInGramsCalculator $weightCalc,
+        array $data = []
     )
     {
+        $this->storeManager = $storeManager;
+        $this->rateResultFactory = $rateResultFactory;
+        $this->rateMethodFactory = $rateMethodFactory;
+        $this->config = $config;
+        $this->ratesClient = $ratesClient;
+        $this->weightCalc = $weightCalc;
+
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
 
@@ -47,15 +68,23 @@ final class Tml extends AbstractCarrier implements CarrierInterface
     {
         $this->_logger->info('[TmlShipping] collectRates called');
 
-        if (!$this->getConfigFlag('active')) {
-            $this->_logger->info('[TmlShipping] Carrier disabled via config');
-            return false;
-        }
-
         $storeId = (int)$request->getStoreId();
         $websiteId = (int)$this->storeManager
             ->getStore($storeId)
             ->getWebsiteId();
+
+        $isCarrierActive = $this->_scopeConfig->isSetFlag(
+            'carriers/' . $this->_code . '/active',
+            ScopeInterface::SCOPE_WEBSITE,
+            $websiteId
+        );
+
+        if (!$isCarrierActive) {
+            $this->_logger->info('[TmlShipping] Carrier disabled via config (website scope)', [
+                'websiteId' => $websiteId
+            ]);
+            return false;
+        }
 
         if (!$this->config->isEnabledForWebsite($websiteId)) {
             $this->_logger->info('[TmlShipping] Disabled for website', [
@@ -100,8 +129,8 @@ final class Tml extends AbstractCarrier implements CarrierInterface
         }
 
         $this->_logger->info('[TmlShipping] Rate received', [
-            'serviceName' => $rate->serviceName,
-            'price' => $rate->totalPrice
+            'serviceName' => $rate->getServiceName(),
+            'price' => $rate->getTotalPrice()
         ]);
 
         $result = $this->rateResultFactory->create();
@@ -111,7 +140,7 @@ final class Tml extends AbstractCarrier implements CarrierInterface
         $method->setCarrierTitle((string)($this->getConfigData('title') ?: 'TML'));
         $method->setMethod('tml');
         $method->setMethodTitle($this->resolveMethodTitle($rate));
-        $price = max(0.0, $rate->totalPrice);
+        $price = max(0.0, $rate->getTotalPrice());
         $method->setPrice($price);
         $method->setCost($price);
 
@@ -124,15 +153,15 @@ final class Tml extends AbstractCarrier implements CarrierInterface
     {
         $parts = [];
 
-        $parts[] = $rate->serviceName;
+        $parts[] = $rate->getServiceName();
 
-        if ($rate->description) {
-            $parts[] = $rate->description;
+        if ($rate->getDescription()) {
+            $parts[] = $rate->getDescription();
         }
 
         $delivery = $this->resolveDeliveryWindow(
-            $rate->minDeliveryDate,
-            $rate->maxDeliveryDate
+            $rate->getMinDeliveryDate(),
+            $rate->getMaxDeliveryDate()
         );
 
         if ($delivery !== '') {

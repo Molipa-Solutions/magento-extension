@@ -10,9 +10,14 @@ class OutboxStatus
 {
     private const BACKOFF_SECONDS = [60, 300, 900, 3600, 21600, 86400];
 
+    /** @var OutboxResource */
+    private $outboxResource;
+
     public function __construct(
-        private readonly OutboxResource $outboxResource
-    ) {}
+        OutboxResource $outboxResource
+    ) {
+        $this->outboxResource = $outboxResource;
+    }
 
     public function markSent(Outbox $o): void
     {

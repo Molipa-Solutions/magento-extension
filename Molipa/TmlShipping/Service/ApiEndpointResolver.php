@@ -7,12 +7,17 @@ use Magento\Framework\App\State;
 
 final class ApiEndpointResolver
 {
-    private const API_BASE_URL_DEV  = 'http://localhost:8080';
-    private const API_BASE_URL_PROD = 'http://localhost:8081';
+    private const API_BASE_URL_DEV  = 'http://host.docker.internal:8080';
+    private const API_BASE_URL_PROD = 'http://localhost:8080';
+
+    /** @var State */
+    private $appState;
 
     public function __construct(
-        private readonly State $appState
-    ) {}
+        State $appState
+    ) {
+        $this->appState = $appState;
+    }
 
     public function resolveStoresUrl(): string
     {

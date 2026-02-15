@@ -13,9 +13,11 @@ class RetryOutboxCommand extends Command
 {
     private const OPTION_LIMIT = 'limit';
 
-    public function __construct(
-        private readonly RetryOutbox $retryOutbox
-    ) {
+    /** @var RetryOutbox */
+    private $retryOutbox;
+
+    public function __construct(RetryOutbox $retryOutbox) {
+        $this->retryOutbox = $retryOutbox;
         parent::__construct();
     }
 
@@ -47,17 +49,17 @@ class RetryOutboxCommand extends Command
                 '<info>[TML] Done. Sent=%d Failed=%d Candidates=%d</info>',
                 (int)($report['sent'] ?? $processed),
                 (int)($report['failed'] ?? 0),
-                (int)($report['candidates'] ?? 0),
+                (int)($report['candidates'] ?? 0)
             ));
 
             if ((int)($report['candidates'] ?? 0) === 0) {
                 $output->writeln('<comment>[TML] No events due for retry.</comment>');
             }
 
-            return Command::SUCCESS;
+            return 0;
         } catch (\Throwable $e) {
             $output->writeln('<error>[TML] Command failed: ' . $e->getMessage() . '</error>');
-            return Command::FAILURE;
+            return 1;
         }
     }
 }

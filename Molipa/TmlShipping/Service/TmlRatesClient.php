@@ -11,14 +11,34 @@ use Molipa\TmlShipping\Model\Dto\CarrierRate;
 
 final class TmlRatesClient
 {
+    /** @var Curl */
+    private $curl;
+    /** @var Json */
+    private $json;
+    /** @var LoggerInterface */
+    private $logger;
+    /** @var Config */
+    private $config;
+    /** @var ApiEndpointResolver */
+    private $apiEndpointResolver;
+    /** @var HmacSigner */
+    private $hmacSigner;
+
     public function __construct(
-        private readonly Curl $curl,
-        private readonly Json $json,
-        private readonly LoggerInterface $logger,
-        private readonly Config $config,
-        private readonly ApiEndpointResolver $apiEndpointResolver,
-        private readonly HmacSigner $hmacSigner,
-    ) {}
+        Curl $curl,
+        Json $json,
+        LoggerInterface $logger,
+        Config $config,
+        ApiEndpointResolver $apiEndpointResolver,
+        HmacSigner $hmacSigner
+    ) {
+        $this->curl = $curl;
+        $this->json = $json;
+        $this->logger = $logger;
+        $this->config = $config;
+        $this->apiEndpointResolver = $apiEndpointResolver;
+        $this->hmacSigner = $hmacSigner;
+    }
 
     public function getRate(int $websiteId, int $totalWeightInGrams, string $postalCode): ?CarrierRate
     {

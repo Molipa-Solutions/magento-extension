@@ -9,13 +9,34 @@ use Psr\Log\LoggerInterface;
 
 class WebhookSender
 {
+    /** @var Curl */
+    private $curl;
+
+    /** @var Config */
+    private $config;
+
+    /** @var LoggerInterface */
+    private $logger;
+
+    /** @var ApiEndpointResolver */
+    private $apiEndpointResolver;
+
+    /** @var HmacSigner */
+    private $hmacSigner;
+
     public function __construct(
-        private readonly Curl $curl,
-        private readonly Config $config,
-        private readonly LoggerInterface $logger,
-        private readonly ApiEndpointResolver $apiEndpointResolver,
-        private readonly HmacSigner $hmacSigner,
-    ) {}
+        Curl $curl,
+        Config $config,
+        LoggerInterface $logger,
+        ApiEndpointResolver $apiEndpointResolver,
+        HmacSigner $hmacSigner
+    ) {
+        $this->curl = $curl;
+        $this->config = $config;
+        $this->logger = $logger;
+        $this->apiEndpointResolver = $apiEndpointResolver;
+        $this->hmacSigner = $hmacSigner;
+    }
 
     public function sendOrders(array $payload, string $eventId, int $websiteId): void
     {

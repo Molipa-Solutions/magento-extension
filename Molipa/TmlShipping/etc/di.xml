@@ -14,12 +14,4 @@
             </argument>
         </arguments>
     </type>
-
-    <type name="Magento\Shipping\Model\CarrierFactory">
-        <arguments>
-            <argument name="carriers" xsi:type="array">
-                <item name="tml" xsi:type="string">Molipa\TmlShipping\Model\Carrier\Tml</item>
-            </argument>
-        </arguments>
-    </type>
 </config>
