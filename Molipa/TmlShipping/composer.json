@@ -1,0 +1,19 @@
+{
+  "name": "tml/module-shipping",
+  "description": "Integración de TML Shipping para Magento 2",
+  "type": "magento2-module",
+  "license": "proprietary",
+  "require": {
+    "php": ">=7.4",
+    "magento/framework": ">=103.0"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Molipa\\TmlShipping\\": ""
+    }
+  },
+  "version": "1.0.0"
+}
