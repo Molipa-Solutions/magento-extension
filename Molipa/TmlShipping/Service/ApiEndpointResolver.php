@@ -7,8 +7,8 @@ use Magento\Framework\App\State;
 
 final class ApiEndpointResolver
 {
-    private const API_BASE_URL_DEV  = 'http://host.docker.internal:8080';
-    private const API_BASE_URL_PROD = 'http://localhost:8080';
+    private const API_BASE_URL_DEV  = 'https://api.molipa-tml.dev/v1/clients/magento';
+    private const API_BASE_URL_PROD = 'https://api.molipa-tml.com.ar/v1/clients/magento';
 
     /** @var State */
     private $appState;

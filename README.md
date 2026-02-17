@@ -82,6 +82,12 @@ Si la tienda se encuentra en modo producción, ejecutar:
 ```bash
     php bin/magento cache:flush
 ```
+
+### 6️⃣ Desactivar Modo Mantenimiento
+
+```bash
+  php bin/magento maintenance:disable
+```
 ---
 
 ## ⚙ Configuración
@@ -102,6 +108,14 @@ Si la tienda se encuentra en modo producción, ejecutar:
 4. Ir a:
    **Stores → Configuration → Sales → Delivery Methods → TML**
 5. Asegurarse que esté habilitado (caso contrario, habilitar y guardar configuración).
+
+> ℹ️ **ALARACIÓN**
+>
+> Si luego de habilitar el módulo en  
+> **Stores → Configuration → Sales → TML Shipping**  
+> las credenciales no se visualizan automáticamente, deshabilitar y volver a habilitar el módulo.
+>
+> Si el problema persiste, contactar al equipo de soporte de TML.
 
 ---
 
