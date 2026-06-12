@@ -168,7 +168,9 @@ class ShipmentCreatedObserver implements ObserverInterface
         }
 
         $streetLines = $addr->getStreet() ?: [];
-        $street = is_array($streetLines) ? ($streetLines[0] ?? '') : (string)$streetLines;
+        $street = is_array($streetLines)
+            ? implode(', ', array_filter(array_map('trim', $streetLines), 'strlen'))
+            : trim((string)$streetLines);
 
         return [
             'street' => $street,
